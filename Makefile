@@ -6,7 +6,7 @@ TARGET=doit
 
 
 all:	doit.o 
-	$(CC) doit.c -o $(TARGET)
+	$(CC) doit.c -o $(TARGET).o
 
 clean:
-	rm *.o $(TARGET)
+	rm *.o 

@@ -9,4 +9,4 @@ all:	doit.o
 	$(CC) doit.c -o $(TARGET).o
 
 clean:
-	rm *.o 
+	rm *.o Test

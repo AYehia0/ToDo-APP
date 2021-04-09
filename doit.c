@@ -7,15 +7,20 @@
 #define PATH "~/"
 
 void helpMenu(){
+
     /*Main Menu, which contains help arguments*/        
+    
     printf("ToDo app to orginize you time\n");
     printf("Usage: doit [OPTION] \n");
     printf("Options:\n");
     printf("\t-a, --action\t\tAdd Event in the list\n");
     printf("\t-d, --delete-action\tDeletes an event from the list\n");
+    printf("\t-s, --start-time\tStarting of the event in 12H format\n");
+    printf("\t-e, --end-time\tEnding of the event in 12H format\n");
 }
 
 bool checkValidTime(int *timeArr){
+    
     /*Check if the time is in a valid form*/
  
     int hours = timeArr[0];
@@ -30,12 +35,12 @@ bool checkValidTime(int *timeArr){
 }
 
 int *getTimeInput(char *timeStr){
+
     /*Process the time given from the user*/
     
     //Array to save the given Time
     int *timeContainer = malloc(sizeof(int)*4); 
     
-    char temp[20];
     //int timeContainer[2];
 
     //Spliting on :
@@ -44,14 +49,15 @@ int *getTimeInput(char *timeStr){
     //Counter just in case
     int coStrLen = 0; 
     
-    while(token != NULL){
-        strcpy(temp, token);
-        timeContainer[coStrLen++] = atoi(temp);
+    while(token != NULL){ 
+        //atoi converts string to int
+        timeContainer[coStrLen++] = atoi(token);
     
         //pointer to the next index for the token
         token = strtok(NULL, ":");
 
     }
+
     return timeContainer;
 
 }
@@ -85,6 +91,7 @@ char *getTodayDate(char whichTime[1]){
 }
 
 void saveToFile(char *event ){
+    /*Saving event+startingTime+endingTime to a file, later would be used to send notificatio connected to crontab*/
     char * date;
     
     FILE *pFile;
@@ -108,19 +115,16 @@ void saveToFile(char *event ){
             fputs("########## ", pFile);
             fputs(date, pFile);
             fputs(" ##########\n", pFile);  
-
-
         }
 
         //Writing to the file
         if(strlen(event) > 0){
             //getting time in HH:MM
-            date = getTodayDate("h");
+            //date = getTodayDate("h");
 
-            fputs(date, pFile);
+            //fputs(date, pFile);
 
             //adding , to seprate 
-            fputs(", ", pFile);
 
             fputs(event, pFile);
 
@@ -135,41 +139,54 @@ void saveToFile(char *event ){
 }
 
 int main(int argc, char *argv[]){
+
+    //Probably Switch-Case is a better way to do this, idk 
+
     if(argv[1]!=NULL){
         
-        //temp var from args
-
-        char *tempArg = argv[1];
-        //Checking for args
-        
-        printf("You give : %s\n", argv[1]);
-        if (checkValidTime(getTimeInput(tempArg))){
-            printf("Valid Time: %s\n", argv[1]);
-        }else{
-            printf("Invalid Time: %s\n", argv[1]);
-        }
-
-        printf("You give : %s\n", tempArg);
-
-
         //checking for appending
-        if(!strcmp("-a", argv[1])==0 || !strcmp("--action", argv[1])==0){
-
-            //Checking for the second arg
-            if(argv[2] != NULL){
-                //Writing to the file
-
-                //Writing the date
-                saveToFile(argv[2]);
-
-            }else{
-                printf("Invalid Input, What do you want to do?\n");
+        if( (!strcmp("-A", argv[1])==0 || !strcmp("--action", argv[1])==0) ) {
+            if(argv[2] != NULL && argv[3] != NULL){
+                if (!strcmp("-s", argv[3]) == 0 || !strcmp("--start-time", argv[3]) == 0 ){
+                    if(argv[4] != NULL){
+                        
+                        //temp var from args
+                        char tempArg [20];
+    
+                        //copying the arg to a temp, as it changes for some reasons
+                        memset(tempArg, '\0', sizeof(tempArg));
+                        strcpy(tempArg, argv[4]);
+                
+                        if (checkValidTime(getTimeInput(argv[4]))){
+                            //Writing the data
+                            saveToFile(argv[2]);
+                            saveToFile(tempArg);
+                        }else{
+                            printf("Invalid Time !! \n\n");
+                            helpMenu();
+                            exit(0);
+                        }
+                    }
+                    else{
+                        printf("Some missing args !!\n\n");
+                        helpMenu();
+                    }
+                }
+                else{
+                    printf("Some missing args !!\n\n");
+                    helpMenu();
+                }
+            }
+            else{
+                printf("Some missing args !!\n\n");
                 helpMenu();
             }
+
+        }else{
+            printf("Some missing args !!\n\n");
+            helpMenu();
         }
     }else{
         helpMenu();
     }
-
-    return 0;
 }

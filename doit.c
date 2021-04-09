@@ -96,7 +96,10 @@ void saveToFile(char *event ){
     
     FILE *pFile;
     pFile = fopen("Test", "a");
+    //For counting lines    
+    int ctr = 0;    
 
+    char c; 
 
     //checking for file
     if(pFile == NULL){
@@ -119,53 +122,58 @@ void saveToFile(char *event ){
 
         //Writing to the file
         if(strlen(event) > 0){
-            //getting time in HH:MM
-            //date = getTodayDate("h");
-
-            //fputs(date, pFile);
-
-            //adding , to seprate 
-
             fputs(event, pFile);
-
-            //adding , to seprate 
-            fputs(", ", pFile);
-
         }
         //Closing the file
         fclose(pFile);
     }
-    
 }
 
 int main(int argc, char *argv[]){
-
+    char prefix[100] = "";
     //Probably Switch-Case is a better way to do this, idk 
 
     if(argv[1]!=NULL){
         
         //checking for appending
-        if( (!strcmp("-A", argv[1])==0 || !strcmp("--action", argv[1])==0) ) {
+        if( (!strcmp("-a", argv[1])==0 || !strcmp("--action", argv[1])==0) ) {
             if(argv[2] != NULL && argv[3] != NULL){
                 if (!strcmp("-s", argv[3]) == 0 || !strcmp("--start-time", argv[3]) == 0 ){
-                    if(argv[4] != NULL){
-                        
-                        //temp var from args
-                        char tempArg [20];
-    
-                        //copying the arg to a temp, as it changes for some reasons
-                        memset(tempArg, '\0', sizeof(tempArg));
-                        strcpy(tempArg, argv[4]);
+                    if(argv[4] != NULL && argv[5] != NULL){
+                        if(!strcmp("-e", argv[5]) == 0 || !strcmp("-end-time", argv[5]) == 0){
+                            if(argv[6] != NULL){
+                                //temp var from args
+                                char tmpStart[20];
+                                char tmpEnd[20]; 
+                                //copying the arg to a temp, as it changes for some reasons
+                                memset(tmpStart, '\0', sizeof(tmpStart));
+                                strcpy(tmpStart, argv[4]);
+
+                                memset(tmpEnd, '\0', sizeof(tmpEnd));
+                                strcpy(tmpEnd, argv[6]);
                 
-                        if (checkValidTime(getTimeInput(argv[4]))){
-                            //Writing the data
-                            saveToFile(argv[2]);
-                            saveToFile(tempArg);
+                                if (checkValidTime(getTimeInput(argv[4])) && checkValidTime(getTimeInput(argv[6])) ){
+
+                                    //Writing the data , better way to do it
+                                    sprintf(prefix,"%s;%s;%s\n",argv[2],tmpStart,tmpEnd);
+                                    saveToFile(prefix);
+                                
+
+                                    printf("ToDo List Has Been Updated !!\n");
+                                }else{
+                                    printf("Invalid Time !! \n\n");
+                                    helpMenu();
+                                    exit(0);
+                                }
+   
+                            }else{
+                                printf("Some missing args !!\n\n");
+                                helpMenu();
+                            }
                         }else{
-                            printf("Invalid Time !! \n\n");
+                            printf("Some missing args !!\n\n");
                             helpMenu();
-                            exit(0);
-                        }
+                        } 
                     }
                     else{
                         printf("Some missing args !!\n\n");

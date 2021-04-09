@@ -36,7 +36,7 @@ char *getTodayDate(char whichTime[1]){
     }else{
         //must be Time in hours
 
-        strftime(date, strlen("HH:MM")+1, "%H:%M", timeInfo);
+        strftime(date, strlen("HH:MM TT")+1, "%I:%M %p", timeInfo);
     }
 
     return date;
@@ -49,9 +49,6 @@ void saveToFile(char *event ){
     FILE *pFile;
     pFile = fopen("Test", "a");
 
-    //Getting the date
-    date = getTodayDate("d");
-    
 
     //checking for file
     if(pFile == NULL){
@@ -63,6 +60,9 @@ void saveToFile(char *event ){
 
         if(ftell(pFile) == 0){
 
+            //Getting the date
+            date = getTodayDate("d");
+    
             //Adding toDay's date
             fputs("########## ", pFile);
             fputs(date, pFile);
@@ -73,13 +73,19 @@ void saveToFile(char *event ){
 
         //Writing to the file
         if(strlen(event) > 0){
+            //getting time in HH:MM
+            date = getTodayDate("h");
+
+            fputs(date, pFile);
+
+            //adding , to seprate 
+            fputs(", ", pFile);
+
             fputs(event, pFile);
 
             //adding , to seprate 
-            fputs(",", pFile);
+            fputs(", ", pFile);
 
-            //Adding a newline
-            fputs(" ", pFile);
         }
         //Closing the file
         fclose(pFile);
@@ -93,7 +99,7 @@ int main(int argc, char *argv[]){
         //Checking for args
 
         //checking for appending
-        if(strcmp("-a", argv[1])==0 || strcmp("--action", argv[1])==0){
+        if(!strcmp("-a", argv[1])==0 || !strcmp("--action", argv[1])==0){
 
             //Checking for the second arg
             if(argv[2] != NULL){

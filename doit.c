@@ -89,7 +89,30 @@ char *getTodayDate(char whichTime[1]){
     return date;
 
 }
+int getNumLines(char *filename){
+    /*Counting the the lines in a file*/
 
+    FILE *fp = fopen(filename,"r");
+
+    int ch=0;
+
+    // counter for lines 
+    int lineCounter = 0;
+
+    if (fp == NULL){
+        return 0;
+    }
+
+    lineCounter++;
+    while ((ch = fgetc(fp)) != EOF){
+        if (ch == '\n'){
+            lineCounter++;
+        }
+    }
+
+    fclose(fp);
+    return lineCounter;
+}
 void saveToFile(char *event ){
     /*Saving event+startingTime+endingTime to a file, later would be used to send notificatio connected to crontab*/
     char * date;
@@ -130,7 +153,12 @@ void saveToFile(char *event ){
 }
 
 int main(int argc, char *argv[]){
+    
+    //Temp to save the line to be added to the file
     char prefix[100] = "";
+
+    int lines = abs(getNumLines("Test") - 1); 
+
     //Probably Switch-Case is a better way to do this, idk 
 
     if(argv[1]!=NULL){
@@ -155,7 +183,7 @@ int main(int argc, char *argv[]){
                                 if (checkValidTime(getTimeInput(argv[4])) && checkValidTime(getTimeInput(argv[6])) ){
 
                                     //Writing the data , better way to do it
-                                    sprintf(prefix,"%s;%s;%s\n",argv[2],tmpStart,tmpEnd);
+                                    sprintf(prefix,"%d;%s;%s;%s\n",lines,argv[2],tmpStart,tmpEnd);
                                     saveToFile(prefix);
                                 
 

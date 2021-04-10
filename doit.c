@@ -3,8 +3,10 @@
 #include <string.h>
 #include <time.h>
 #include <stdbool.h>
+#include <unistd.h>  // access() to check for the exitstance of a file 
 
 #define PATH "~/"
+#define FILENAME "Test"
 
 void helpMenu(){
 
@@ -17,6 +19,10 @@ void helpMenu(){
     printf("\t-d, --delete-action\tDeletes an event from the list\n");
     printf("\t-s, --start-time\tStarting of the event in 12H format\n");
     printf("\t-e, --end-time\tEnding of the event in 12H format\n");
+    printf("\t-l, --show-list\tShowing the todo list and exit\n");
+    
+    //example
+    printf("\n\nExample: doit -a \"Something\" -s 10:23 -e 12:24\n");
 }
 
 bool checkValidTime(int *timeArr){
@@ -104,6 +110,7 @@ int getNumLines(char *filename){
     }
 
     lineCounter++;
+
     while ((ch = fgetc(fp)) != EOF){
         if (ch == '\n'){
             lineCounter++;
@@ -119,6 +126,7 @@ void saveToFile(char *event ){
     
     FILE *pFile;
     pFile = fopen("Test", "a");
+
     //For counting lines    
     int ctr = 0;    
 
@@ -152,6 +160,35 @@ void saveToFile(char *event ){
     }
 }
 
+void deleteLine(int lineNumber){
+    /*Using sed (linux specific)to delete a line by its number*/
+    char lineStr[20];
+
+    //check if file exits
+    if(access(FILENAME, F_OK) == 0){
+
+        sprintf(lineStr, "sed -i '%dd' %s", lineNumber + 1, FILENAME);
+
+        //executing
+        system(lineStr);
+    }else{
+        //file doesn't exist
+        printf("You didn't create list \n");
+        exit(0);
+    }
+}
+void showList(){
+
+    //checking if file exists or not
+    if(access(FILENAME, F_OK) == 0){
+        system("cat Test");
+    }else{
+        //file doesn't exist
+        printf("You didn't create list \n");
+        exit(0);
+    }
+}
+
 int main(int argc, char *argv[]){
     
     //Temp to save the line to be added to the file
@@ -162,9 +199,20 @@ int main(int argc, char *argv[]){
     //Probably Switch-Case is a better way to do this, idk 
 
     if(argv[1]!=NULL){
-        
+        if(strcmp("-l", argv[1]) == 0){
+            showList();
+            exit(0);
+        }
+        if(argv[2]!=NULL){
+            if(strcmp("-d",argv[1]) == 0){
+                //delete a line and exit
+                int lineNum = atoi(argv[2]);
+                deleteLine(lineNum);
+                exit(0);
+            }
+        }
         //checking for appending
-        if( (!strcmp("-a", argv[1])==0 || !strcmp("--action", argv[1])==0) ) {
+        if( (!strcmp("-a", argv[1]) == 0 || !strcmp("--action", argv[1]) == 0) ) {
             if(argv[2] != NULL && argv[3] != NULL){
                 if (!strcmp("-s", argv[3]) == 0 || !strcmp("--start-time", argv[3]) == 0 ){
                     if(argv[4] != NULL && argv[5] != NULL){
